@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Blog</title>
+</head>
+<body>
+
+<h1>My Blog</h1>
+
+<input id="post" placeholder="Write something">
+<button onclick="addPost()">Add</button>
+
+<ul id="posts"></ul>
+
+<script>
+async function addPost() {
+    const content = document.getElementById("post").value;
+
+    await fetch("http://backend-service:5000/add", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({content})
+    });
+
+    loadPosts();
+}
+
+async function loadPosts() {
+    const res = await fetch("http://backend-service:5000/posts");
+    const data = await res.json();
+
+    const list = document.getElementById("posts");
+    list.innerHTML = "";
+
+    data.forEach(p => {
+        const li = document.createElement("li");
+        li.innerText = p[1];
+        list.appendChild(li);
+    });
+}
+
+loadPosts();
+</script>
+
+</body>
+</html>
