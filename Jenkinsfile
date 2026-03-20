@@ -6,17 +6,12 @@ pipeline {
         IMAGE_FRONTEND = "${DOCKERHUB_USER}/blog-frontend"
     }
     stages {
-<<<<<<< HEAD
-
-        stage('Docker Login') {
-=======
         stage('Pull Code') {
             steps {
                 echo 'Code pulled from GitHub'
             }
         }
         stage('Build Docker Images') {
->>>>>>> bd7dbdd (jenkins update)
             steps {
                 sh "docker build -t ${IMAGE_BACKEND}:latest ./backend"
                 sh "docker build -t ${IMAGE_FRONTEND}:latest ./frontend"
@@ -43,7 +38,7 @@ pipeline {
             }
         }
     }
-    post {                          // ✅ HERE — outside stages
+    post {
         success { echo 'Done!' }
         failure { echo 'Failed — check logs' }
     }
