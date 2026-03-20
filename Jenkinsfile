@@ -10,7 +10,7 @@ pipeline {
 
         stage('Clone Code') {
             steps {
-                git '<your-github-repo-url>'
+                git 'https://github.com/Akshay09-tech/BlogApp-Jenkins-project'
             }
         }
 
