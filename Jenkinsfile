@@ -1,53 +1,50 @@
 pipeline {
     agent any
-
     environment {
-        DOCKER_HUB = "akshaychhallare"
-        EC2_HOST = "<EC2-2-PUBLIC-IP>"
+        DOCKERHUB_USER = 'akshaychhallare'
+        IMAGE_BACKEND  = "${DOCKERHUB_USER}/blog-backend"
+        IMAGE_FRONTEND = "${DOCKERHUB_USER}/blog-frontend"
     }
-
     stages {
+<<<<<<< HEAD
 
         stage('Docker Login') {
+=======
+        stage('Pull Code') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-                    sh 'echo $PASS | docker login -u $USER --password-stdin'
+                echo 'Code pulled from GitHub'
+            }
+        }
+        stage('Build Docker Images') {
+>>>>>>> bd7dbdd (jenkins update)
+            steps {
+                sh "docker build -t ${IMAGE_BACKEND}:latest ./backend"
+                sh "docker build -t ${IMAGE_FRONTEND}:latest ./frontend"
+            }
+        }
+        stage('Push to DockerHub') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                    sh "docker push ${IMAGE_BACKEND}:latest"
+                    sh "docker push ${IMAGE_FRONTEND}:latest"
                 }
             }
         }
-
-        stage('Build Backend') {
+        stage('Deploy to Kubernetes') {
             steps {
-                sh 'docker build -t $DOCKER_HUB/blog-backend:latest backend/'
+                sh "kubectl apply -f k8s/"
+                sh "kubectl rollout restart deployment/backend"
+                sh "kubectl rollout restart deployment/frontend"
             }
         }
-
-        stage('Build Frontend') {
-            steps {
-                sh 'docker build -t $DOCKER_HUB/blog-frontend:latest frontend/'
-            }
-        }
-
-        stage('Push Images') {
-            steps {
-                sh 'docker push $DOCKER_HUB/blog-backend:latest'
-                sh 'docker push $DOCKER_HUB/blog-frontend:latest'
-            }
-        }
-
-        stage('Deploy to K8s') {
-            steps {
-                sshagent(['ec2-ssh']) {
-                    sh '''
-                    ssh -i /var/lib/jenkins/mumbai-key-pair.pem ec2-user@$EC2_HOST "
-                    cd blog-k8s &&
-                    kubectl apply -f . &&
-                    kubectl rollout restart deployment backend &&
-                    kubectl rollout restart deployment frontend
-                    "
-                    '''
-                }
-            }
-        }
+    }
+    post {                          // ✅ HERE — outside stages
+        success { echo 'Done!' }
+        failure { echo 'Failed — check logs' }
     }
 }
