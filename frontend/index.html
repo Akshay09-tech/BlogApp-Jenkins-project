@@ -15,7 +15,7 @@
 <script>
 async function addPost() {
     const content = document.getElementById("post").value;
-    await fetch("http://35.154.103.73/add", {
+    await fetch("http://35.154.103.73:8081/add", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({content})
@@ -24,7 +24,7 @@ async function addPost() {
 }
 
 async function loadPosts() {
-    const res = await fetch("http://35.154.103.73/posts");
+    const res = await fetch("http://35.154.103.73:8081/posts");
     const data = await res.json();
     const list = document.getElementById("posts");
     list.innerHTML = "";
