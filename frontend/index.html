@@ -2,33 +2,223 @@
 <html>
 <head>
 <title>Blogging</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #f0f2f5;
+    min-height: 100vh;
+    padding: 40px 20px;
+  }
+
+  .container {
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .header h1 {
+    font-size: 42px;
+    color: #1a1a2e;
+    font-weight: 800;
+    letter-spacing: -1px;
+  }
+
+  .header p {
+    color: #888;
+    margin-top: 8px;
+    font-size: 15px;
+  }
+
+  .write-box {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    margin-bottom: 32px;
+  }
+
+  .write-box textarea {
+    width: 100%;
+    border: 2px solid #e8e8e8;
+    border-radius: 12px;
+    padding: 16px;
+    font-size: 15px;
+    font-family: 'Segoe UI', sans-serif;
+    resize: none;
+    height: 100px;
+    outline: none;
+    transition: border 0.2s;
+    color: #333;
+  }
+
+  .write-box textarea:focus {
+    border-color: #6c63ff;
+  }
+
+  .write-box button {
+    margin-top: 12px;
+    width: 100%;
+    padding: 14px;
+    background: #6c63ff;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+  }
+
+  .write-box button:hover {
+    background: #574fd6;
+  }
+
+  .write-box button:active {
+    transform: scale(0.98);
+  }
+
+  .posts-header {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 16px;
+    padding-left: 4px;
+  }
+
+  .post-card {
+    background: white;
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6c63ff, #a78bfa);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .post-content {
+    flex: 1;
+  }
+
+  .post-author {
+    font-weight: 700;
+    color: #1a1a2e;
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+
+  .post-text {
+    color: #444;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #aaa;
+  }
+
+  .empty-state div {
+    font-size: 48px;
+    margin-bottom: 12px;
+  }
+
+  .empty-state p {
+    font-size: 15px;
+  }
+</style>
 </head>
 <body>
-<h1>My Blog</h1>
-<input id="post" placeholder="Write something">
-<button onclick="addPost()">Add</button>
-<ul id="posts"></ul>
+
+<div class="container">
+
+  <div class="header">
+    <h1>✍️ My Blog</h1>
+    <p>Share your thoughts with the world</p>
+  </div>
+
+  <div class="write-box">
+    <textarea id="post" placeholder="What's on your mind?"></textarea>
+    <button onclick="addPost()">Publish Post</button>
+  </div>
+
+  <div class="posts-header">Recent Posts</div>
+  <ul id="posts" style="list-style:none;padding:0;"></ul>
+
+</div>
+
 <script>
 async function addPost() {
-    const content = document.getElementById("post").value;
-    await fetch("http://35.154.103.73:5000/add", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({content})
-    });
-    loadPosts();
+  const content = document.getElementById("post").value.trim();
+  if (!content) return;
+  await fetch("http://35.154.103.73:5000/add", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({content})
+  });
+  document.getElementById("post").value = "";
+  loadPosts();
 }
+
 async function loadPosts() {
-    const res = await fetch("http://35.154.103.73:5000/posts");
-    const data = await res.json();
-    const list = document.getElementById("posts");
-    list.innerHTML = "";
-    data.forEach(p => {
-        const li = document.createElement("li");
-        li.innerText = p[1];
-        list.appendChild(li);
-    });
+  const res = await fetch("http://35.154.103.73:5000/posts");
+  const data = await res.json();
+  const list = document.getElementById("posts");
+  list.innerHTML = "";
+
+  if (data.length === 0) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <div>📝</div>
+        <p>No posts yet — write your first one!</p>
+      </div>`;
+    return;
+  }
+
+  data.slice().reverse().forEach(p => {
+    const li = document.createElement("li");
+    li.className = "post-card";
+    li.innerHTML = `
+      <div class="avatar">A</div>
+      <div class="post-content">
+        <div class="post-author">Akshay</div>
+        <div class="post-text">${p[1]}</div>
+      </div>`;
+    list.appendChild(li);
+  });
 }
+
 loadPosts();
 </script>
 </body>
