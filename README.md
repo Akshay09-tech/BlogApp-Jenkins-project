@@ -1,7 +1,7 @@
 📝 Three-Tier Blogging App — CI/CD Pipeline on AWS
 
 🚀 Project Overview
-A fully automated CI/CD pipeline that deploys a Three-Tier Blogging Web Application on AWS EC2 using Jenkins, Docker, and Kubernetes.
+A fully automated CI/CD pipeline that deploys a Three-Tier Blogging Web Application on AWS EC2 using Jenkins, Docker, and Kubernetes. 
 Every time code is pushed to GitHub — Jenkins automatically builds Docker images, pushes them to DockerHub, and deploys to Kubernetes. No manual steps required.
 
 🖥️ App Preview
